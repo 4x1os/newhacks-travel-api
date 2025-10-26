@@ -14,7 +14,8 @@ INFO_FILE = os.path.join("/tmp", "info.csv")
 origins = [
     "http://localhost:3000", 
     "https://newhacks-travel-api.vercel.app", 
-    "https://newhacks-travelguide.vercel.app"
+    "https://newhacks-travelguide.vercel.app",
+    "https://newhacks-travelguide-git-main-arthur-xus-projects.vercel.app"
 ]
 
 app = FastAPI()
