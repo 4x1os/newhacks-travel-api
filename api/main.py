@@ -32,14 +32,6 @@ class AttractionList(BaseModel):
     """The root object containing the list of all attractions."""
     attractions: List[Attraction]
 
-def parse_csv(filename: str = INFO_FILE) -> List[dict[str, any]]:
-    with open(filename, mode='r', encoding='utf-8') as file:
-        csv_reader = csv.reader(file)
-        header = next(csv_reader)
-        print("Header:", header)
-        for row in csv_reader:
-            print(row)
-
 def store_data_to_csv(project: str, prompt: str, filename: str = INFO_FILE) -> None:
     if not project or not prompt:
         return
