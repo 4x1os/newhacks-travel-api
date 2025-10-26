@@ -11,7 +11,7 @@ from typing import List
 import json
 import csv 
 from mangum import Mangum
-
+from fastapi import HTTPException
 from fastapi import FastAPI
 app = FastAPI()
 
@@ -24,7 +24,10 @@ class Attraction(BaseModel):
     Title: str
     Location: str
     Description: str
-    Tags: str # Keeping this as a string, but could be a list if needed
+    Tags: str 
+    Hazards: str 
+    Considerations: str
+    Alternatives: str
 
 class AttractionList(BaseModel):
     """The root object containing the list of all attractions."""
@@ -41,28 +44,25 @@ def parse_csv(filename: str = INFO_FILE) -> List[dict[str, any]]:
 def store_data_to_csv(project: str, prompt: str, filename: str = INFO_FILE) -> None:
     if not project or not prompt:
         return
-
-    # Check if file exists to determine if we need to write the header
     file_exists = os.path.exists(filename)
     
-    # Extract keys from the first item to use as column headers
+    import datetime
+    data_row = {
+        'project': project,
+        'prompt': prompt,
+        'timestamp': datetime.datetime.now().isoformat()
+    }
+
+    FIELD_NAMES = ['project', 'prompt', 'timestamp']
 
     try:
         with open(filename, 'a', newline='', encoding='utf-8') as csvfile:
-            writer = csv.DictWriter(csvfile)
-            writer.writerow(prompt)
+            writer = csv.DictWriter(csvfile, fieldnames=FIELD_NAMES)
+            if not file_exists:
+                writer.writeheader()
+            writer.writerow(data_row)
     except Exception as e:
         print(f"Error writing to CSV file {filename}: {e}")
-
-@app.get('/testapi/')
-def get_attraction_results(key_project: str, prompt: str):
-    data = generate_content(key_project, prompt)
-    store_data_to_csv(key_project, prompt, INFO_FILE)
-    return data
-
-@app.get('/')
-def testidea():
-    return {"Hello": "World"}
 
 def generate_content(keyline: str, main_prompt: str) -> None:
     with open(INFO_FILE, 'rb') as f:
@@ -74,11 +74,12 @@ def generate_content(keyline: str, main_prompt: str) -> None:
         )
     prompt = (
         "Based on the context file and your general knowledge, "
-        "generate a list of the 5 best places to visit in ${keyline}. "
+        f"generate a list of the 5 best places to visit in ${keyline}."
         "The output MUST strictly follow the provided JSON schema."
-        "Assume a customer is asking you information regarding the place with ${main_prompt}"
-        "If the prompt is irrelevant or incoherent, ignore the prompt and base your findings off"
-        "of the location given, and the prior info in info.csv."
+        f"Assume a customer is asking you information regarding the place with ${main_prompt}"
+        "If the prompt is irrelevant, ignore the prompt and base your findings off"
+        f"of the the top 5 best places to visit in ${keyline}"
+        "Use the CSV file attached as prior search history and use it to base user interest."
     )
 
     response = client.models.generate_content(
@@ -94,6 +95,21 @@ def generate_content(keyline: str, main_prompt: str) -> None:
     data = json.loads(response.text)
     attractions_list = data.get('attractions', [])
     return attractions_list
+
+@app.get('/')
+def testidea():
+    return {"Hello": "World"}
+
+@app.get('/testapi/')
+def get_attraction_results(key_project: str, prompt: str):
+    try:
+        store_data_to_csv(key_project, prompt, INFO_FILE)
+        data = generate_content(key_project, prompt)
+        return data
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="An internal server error occurred.")
 
 
 # --- CSV CONVERSION AND SAVING ---
