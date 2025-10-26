@@ -89,6 +89,7 @@ def generate_content(keyline: str, main_prompt: str) -> None:
 def testidea():
     return {'message': 'Hello from FastAPI!'}
 
+@app.get("/testapi")
 @app.get('/testapi/')
 def get_attraction_results(key_project: str, prompt: str):
     try:
