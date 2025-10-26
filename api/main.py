@@ -16,7 +16,7 @@ app = FastAPI()
 load_dotenv()
 
 client = genai.Client()
-INFO_FILE = "info.csv"
+INFO_FILE = os.path.join("/tmp", "info.csv")
 
 class Attraction(BaseModel):
     Title: str
