@@ -8,11 +8,23 @@ import csv
 from fastapi import HTTPException
 from fastapi import FastAPI
 import datetime
-
+from fastapi.middleware.cors import CORSMiddleware
 GENERATED_ATTRACTIONS_FILE = "generated_attractions.csv"
 INFO_FILE = os.path.join("/tmp", "info.csv")
+origins = [
+    "http://localhost:3000",  # Your local Next.js development server
+    "https://newhacks-travel-api.vercel.app" # The deployed Vercel site, if needed
+]
+
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins, # List of origins that are allowed to make requests
+    allow_credentials=True,
+    allow_methods=["*"],    # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"],    # Allow all headers
+)
 
 load_dotenv()
 
