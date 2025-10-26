@@ -10,13 +10,13 @@ from fastapi import HTTPException
 from fastapi import FastAPI
 
 
-app = FastAPI(title="Serverless API")
+app = FastAPI()
 
 
 load_dotenv()
-client = genai.Client()
 
-INFO_FILE = os.path.join("/tmp", "info.csv")
+client = genai.Client()
+INFO_FILE = "info.csv"
 
 class Attraction(BaseModel):
     Title: str
@@ -74,10 +74,9 @@ def generate_content(keyline: str, main_prompt: str) -> None:
         "Based on the context file and your general knowledge, "
         f"generate a list of the 5 best places to visit in {keyline}."
         "The output MUST strictly follow the provided JSON schema."
-        f"Assume a customer is asking you information regarding the place with {main_prompt}"
-        "If the prompt is irrelevant, ignore the prompt and base your findings off"
-        f"of the the top 5 best places to visit in {keyline}"
-        "Use the CSV file attached as prior search history and use it to base user interest."
+        f"Assume a customer is asking you information regarding the place with prompt '{main_prompt}'"
+        "and give the best results you can regarding that prompt. If you cannot find any information"
+        f"on the prompt given, use the best places to visit in {keyline} given the CSV file attached based on recent search history."
     )
 
     response = client.models.generate_content(
@@ -94,9 +93,10 @@ def generate_content(keyline: str, main_prompt: str) -> None:
     attractions_list = data.get('attractions', [])
     return attractions_list
 
+
 @app.get('/')
 def testidea():
-    return {"message": "hello, world!"}
+    return {'message': 'Hello from FastAPI!'}
 
 @app.get('/testapi/')
 def get_attraction_results(key_project: str, prompt: str):
