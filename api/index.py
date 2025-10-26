@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from typing import List
 import json
 import csv 
+from mangum import Mangum
 
 from fastapi import FastAPI
 app = FastAPI()
@@ -115,7 +116,4 @@ def generate_content(keyline: str, main_prompt: str) -> None:
     #         writer.writeheader() # Write the headers
     #         writer.writerows(attractions_list) # Write the rows
 
-
-
-
-
+handler = Mangum(app)
