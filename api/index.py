@@ -1,11 +1,6 @@
 import os
 from dotenv import load_dotenv
 from google import genai
-import asyncio
-from mcp import ClientSession, StdioServerParameters
-from mcp.client.stdio import stdio_client
-import io
-import httpx
 from pydantic import BaseModel
 from typing import List
 import json
@@ -13,13 +8,15 @@ import csv
 from mangum import Mangum
 from fastapi import HTTPException
 from fastapi import FastAPI
-app = FastAPI()
+
+
+app = FastAPI(title="Serverless API")
 
 
 load_dotenv()
 client = genai.Client()
 
-INFO_FILE = os.path.join("/tmp", "./info.csv")
+INFO_FILE = os.path.join("/tmp", "info.csv")
 
 class Attraction(BaseModel):
     Title: str
@@ -75,11 +72,11 @@ def generate_content(keyline: str, main_prompt: str) -> None:
         )
     prompt = (
         "Based on the context file and your general knowledge, "
-        f"generate a list of the 5 best places to visit in ${keyline}."
+        f"generate a list of the 5 best places to visit in {keyline}."
         "The output MUST strictly follow the provided JSON schema."
-        f"Assume a customer is asking you information regarding the place with ${main_prompt}"
+        f"Assume a customer is asking you information regarding the place with {main_prompt}"
         "If the prompt is irrelevant, ignore the prompt and base your findings off"
-        f"of the the top 5 best places to visit in ${keyline}"
+        f"of the the top 5 best places to visit in {keyline}"
         "Use the CSV file attached as prior search history and use it to base user interest."
     )
 
@@ -99,7 +96,7 @@ def generate_content(keyline: str, main_prompt: str) -> None:
 
 @app.get('/')
 def testidea():
-    return {"Hello": "World"}
+    return {"message": "hello, world!"}
 
 @app.get('/testapi/')
 def get_attraction_results(key_project: str, prompt: str):
@@ -111,26 +108,5 @@ def get_attraction_results(key_project: str, prompt: str):
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail="An internal server error occurred.")
-
-
-# --- CSV CONVERSION AND SAVING ---
-
-    # data = json.loads(response.text)
-    # attractions_list = data.get('attractions', [])
-
-    # if not attractions_list:
-    #     print("Model returned an empty list of attractions.")
-    # else:
-    #     # 8. Define the output file and use Python's built-in csv module
-    #     OUTPUT_CSV_PATH = 'generated_attractions.csv'
-        
-    #     # Extract keys from the first item to use as column headers
-    #     fieldnames = list(attractions_list[0].keys())
-
-    #     with open(OUTPUT_CSV_PATH, 'w', newline='', encoding='utf-8') as csvfile:
-    #         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            
-    #         writer.writeheader() # Write the headers
-    #         writer.writerows(attractions_list) # Write the rows
 
 handler = Mangum(app)
