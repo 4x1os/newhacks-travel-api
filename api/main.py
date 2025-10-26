@@ -5,7 +5,6 @@ from pydantic import BaseModel
 from typing import List
 import json
 import csv 
-from mangum import Mangum
 from fastapi import HTTPException
 from fastapi import FastAPI
 import datetime
@@ -100,5 +99,3 @@ def get_attraction_results(key_project: str, prompt: str):
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail="An internal server error occurred.")
-
-handler = Mangum(app)
