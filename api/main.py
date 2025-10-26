@@ -8,15 +8,16 @@ import csv
 from mangum import Mangum
 from fastapi import HTTPException
 from fastapi import FastAPI
+import datetime
 
-
+GENERATED_ATTRACTIONS_FILE = "generated_attractions.csv"
+INFO_FILE = os.path.join("/tmp", "info.csv")
 app = FastAPI()
 
 
 load_dotenv()
 
 client = genai.Client()
-INFO_FILE = os.path.join("/tmp", "info.csv")
 
 class Attraction(BaseModel):
     Title: str
@@ -32,7 +33,7 @@ class AttractionList(BaseModel):
     attractions: List[Attraction]
 
 def parse_csv(filename: str = INFO_FILE) -> List[dict[str, any]]:
-    with open('./generated_attractions.csv', mode='r', encoding='utf-8') as file:
+    with open(filename, mode='r', encoding='utf-8') as file:
         csv_reader = csv.reader(file)
         header = next(csv_reader)
         print("Header:", header)
@@ -44,7 +45,6 @@ def store_data_to_csv(project: str, prompt: str, filename: str = INFO_FILE) -> N
         return
     file_exists = os.path.exists(filename)
     
-    import datetime
     data_row = {
         'project': project,
         'prompt': prompt,
