@@ -12,8 +12,9 @@ from fastapi.middleware.cors import CORSMiddleware
 GENERATED_ATTRACTIONS_FILE = "generated_attractions.csv"
 INFO_FILE = os.path.join("/tmp", "info.csv")
 origins = [
-    "http://localhost:3000",  # Your local Next.js development server
-    "https://newhacks-travel-api.vercel.app" # The deployed Vercel site, if needed
+    "http://localhost:3000", 
+    "https://newhacks-travel-api.vercel.app", 
+    "https://newhacks-travelguide.vercel.app/"
 ]
 
 app = FastAPI()
@@ -22,8 +23,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins, # List of origins that are allowed to make requests
     allow_credentials=True,
-    allow_methods=["*"],    # Allow all methods (GET, POST, etc.)
-    allow_headers=["*"],    # Allow all headers
+    allow_methods=["*"],   
+    allow_headers=["*"],  
 )
 
 load_dotenv()
@@ -40,7 +41,6 @@ class Attraction(BaseModel):
     Alternatives: str
 
 class AttractionList(BaseModel):
-    """The root object containing the list of all attractions."""
     attractions: List[Attraction]
 
 def store_data_to_csv(project: str, prompt: str, filename: str = INFO_FILE) -> None:
@@ -75,7 +75,7 @@ def generate_content(keyline: str, main_prompt: str) -> None:
         )
     prompt = (
         "Based on the context file and your general knowledge, "
-        f"generate a list of the 5 best places to visit in {keyline}."
+        f"generate a list of the 6 best places to visit in {keyline}."
         "The output MUST strictly follow the provided JSON schema."
         f"Assume a customer is asking you information regarding the place with prompt '{main_prompt}'"
         "and give the best results you can regarding that prompt. If you cannot find any information"
