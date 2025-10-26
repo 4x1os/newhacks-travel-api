@@ -97,6 +97,6 @@ def get_attraction_results(key_project: str, prompt: str):
         data = generate_content(key_project, prompt)
         return data
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail="An internal server error occurred.")
